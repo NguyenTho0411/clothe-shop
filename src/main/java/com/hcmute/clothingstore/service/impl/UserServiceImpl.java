@@ -71,5 +71,13 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(savedUser, UserResponse.class);
     }
 
+    @Override
+    public User getUserByLogin(String email) {
+        return userRepository.findByEmailAndActivatedTrue(email).orElseThrow(() -> new ResourceNotFoundException("User","Email: ",email));
+    }
 
+    @Override
+    public void updateUserWithRefreshToken(User loginUser, String refreshToken) {
+
+    }
 }
