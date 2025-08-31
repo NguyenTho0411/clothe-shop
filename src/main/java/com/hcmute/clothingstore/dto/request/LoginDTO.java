@@ -3,13 +3,12 @@ package com.hcmute.clothingstore.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class LoginDTO {
 
     @NotBlank(message = "Please type your email address")
@@ -18,4 +17,6 @@ public class LoginDTO {
 
     @NotBlank(message="Please type your password")
     private String password;
+
+
 }

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Getter
+@Setter
 public class LoginResponse {
     @JsonProperty("access_token")
     private String accessToken;
@@ -34,6 +36,8 @@ public class LoginResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
+    @Getter
+    @Setter
     public static class RoleOfUser{
         private Long id;
 
@@ -45,6 +49,8 @@ public class LoginResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
+    @Getter
+    @Setter
     public static class UserInsideToken{
         private Long id;
 

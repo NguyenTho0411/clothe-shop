@@ -1,11 +1,12 @@
 package com.hcmute.clothingstore.controller;
 
 
-import com.hcmute.clothingstore.AppConstant;
+import com.hcmute.clothingstore.appconstant.AppConstant;
 import com.hcmute.clothingstore.dto.request.LoginDTO;
+import com.hcmute.clothingstore.dto.request.RegisterDTO;
 import com.hcmute.clothingstore.dto.response.LoginResponse;
+import com.hcmute.clothingstore.dto.response.RegisterResponse;
 import com.hcmute.clothingstore.jwt.JwtUtil;
-import com.hcmute.clothingstore.service.impl.AuthenticationServiceImpl;
 import com.hcmute.clothingstore.service.interfaces.AuthenticationService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -20,7 +21,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,8 +42,6 @@ public class AuthenticationController {
 
     private AuthenticationManager authenticationManager;
 
-    @Value("${domain}")
-    private  String DOMAIN;
 
             @PostMapping("/auth/login")
     private ResponseEntity<?> loginUser(@RequestBody @Valid LoginDTO loginDTO){
@@ -61,7 +59,7 @@ public class AuthenticationController {
             String refreshToken =jwtUtil.creteRefreshToken(loginDTO.getEmail(),loginResponse);
 
             ResponseCookie responseCookie = ResponseCookie.from(AppConstant.REFRESH_TOKEN_COOKIE_NAME,refreshToken)
-                    .httpOnly(true).secure(true).path("/").maxAge(AppConstant.REFRESH_TOKEN_COOKIE_EXPIRE).sameSite("NONE").domain(DOMAIN).build();
+                    .httpOnly(true).secure(true).path("/").maxAge(AppConstant.REFRESH_TOKEN_COOKIE_EXPIRE).sameSite("NONE").build();
 
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.SET_COOKIE, responseCookie.toString());
@@ -69,6 +67,12 @@ public class AuthenticationController {
         }else{
             return new ResponseEntity<>(loginResponse,HttpStatus.OK);
         }
+    }
+
+    @PostMapping("/auth/register")
+    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterDTO registerDTO){
+        RegisterResponse registerResponse = authenticationService.register(registerDTO);
+        return new ResponseEntity<>(registerResponse,HttpStatus.CREATED);
     }
 
 }

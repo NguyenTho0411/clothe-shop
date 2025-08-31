@@ -1,6 +1,7 @@
 package com.hcmute.clothingstore.dto.request;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hcmute.clothingstore.config.EnumValue;
 import com.hcmute.clothingstore.enumerated.Gender;
 import jakarta.validation.constraints.NotBlank;
@@ -34,11 +35,10 @@ public class RegisterDTO {
 
     @Pattern(regexp = "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$", message = "Please type valid phone number")
     private String phone;
-
-
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
 
     @EnumValue(enumClass = com.hcmute.clothingstore.enumerated.Gender.class, message = "Invalid Gender")
-    private String Gender;
+    private String gender;
 
 }

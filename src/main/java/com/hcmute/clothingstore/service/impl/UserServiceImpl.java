@@ -41,8 +41,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse createNewUser(UserDTO userDTO) {
         String email = userDTO.getEmail();
-        User userFromDB = userRepository.findByEmail(email);
-        if(userFromDB != null){
+        if(userRepository.findByEmail(email) != null){
             throw new APIException("User with email "+email+" has already existed!");
         }
         Long roleId = userDTO.getId();

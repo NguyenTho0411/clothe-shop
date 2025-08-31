@@ -62,7 +62,8 @@ public class User extends AbstractEntity{
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRefreshToken> userRefreshTokens;
-
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private CustomerAccount customerAccount;
 
     @Column(name="google_id")
     private String googleId;

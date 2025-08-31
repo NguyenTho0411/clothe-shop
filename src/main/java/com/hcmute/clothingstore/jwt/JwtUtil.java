@@ -22,7 +22,7 @@ public class JwtUtil {
     @Value("${jwt-base-64-secret-key}")
     private String jwtKey;
 
-    @Value(("${jwt.access-token-validity-in-seconds"))
+    @Value("${jwt.access-token-validity-in-seconds}")
     private Long accessTokenExpiration;
 
     @Value("${jwt.refresh-token-validity-in-seconds}")
