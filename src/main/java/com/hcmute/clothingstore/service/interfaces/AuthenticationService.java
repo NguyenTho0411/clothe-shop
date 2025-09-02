@@ -21,4 +21,6 @@ public interface AuthenticationService {
     void sendActivationEmail(String email);
 
     LoginResponse refreshToken(String refreshToken);
+
+    void logout(String s);
 }

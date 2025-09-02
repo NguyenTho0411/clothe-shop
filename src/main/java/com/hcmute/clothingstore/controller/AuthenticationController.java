@@ -4,6 +4,7 @@ package com.hcmute.clothingstore.controller;
 import com.hcmute.clothingstore.appconstant.AppConstant;
 import com.hcmute.clothingstore.dto.request.GoogleAuthenticationRequestDTO;
 import com.hcmute.clothingstore.dto.request.LoginDTO;
+import com.hcmute.clothingstore.dto.request.LogoutDTO;
 import com.hcmute.clothingstore.dto.request.RegisterDTO;
 import com.hcmute.clothingstore.dto.request.forgotpass.RequestEmailRecoverDTO;
 import com.hcmute.clothingstore.dto.request.forgotpass.RequestResetPasswordDTO;
@@ -68,6 +69,14 @@ public class AuthenticationController {
             return new ResponseEntity<>(loginResponse,HttpStatus.OK);
         }
     }
+    @PostMapping("/auth/logout")
+    public ResponseEntity<Void> logout(@RequestBody LogoutDTO logoutDTO,
+                    @CookieValue(name= AppConstant.REFRESH_TOKEN_COOKIE_NAME, required = false) String refreshToken){
+        ResponseCookie responseCookie = ResponseCookie.from(AppConstant.REFRESH_TOKEN_COOKIE_NAME,"").sameSite("None").httpOnly(true).secure(true).path("/").maxAge(AppConstant.REFRESH_TOKEN_COOKIE_EXPIRE).build();
+        authenticationService.logout(refreshToken == null ? logoutDTO.getRefreshToken() : refreshToken);
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, responseCookie.toString()).build();
+    }
+
     @PostMapping("/auth/login/google")
     public ResponseEntity<LoginResponse> loginGoogle(@RequestBody @Valid GoogleAuthenticationRequestDTO loginGoogleDTO){
         LoginResponse loginResponse =authenticationService.authenticationLoginGoole(loginGoogleDTO.getCode());
