@@ -22,4 +22,6 @@ public final class AppConstant {
 
     //EMAIL CONSTANT TEMPLATE
     public static final String ACTIVATION_CODE_EMAIL_TEMPLATE = "mail/activationCodeEmail";
+    public static final String RECOVER_PASSOWRD_EMAIL_TEMPALE = "mail/recoverPasswordEmail";
+    public static final String RECOVER_PASSWORD_EMAIL_SUBJECT =  "[BLACK&MOON] Recover Your Password";
 }

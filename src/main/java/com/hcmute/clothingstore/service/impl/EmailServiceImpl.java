@@ -83,4 +83,10 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
+    public void sendRecoverPasswordEmail(User user) {
+        String userName = user.getProfile().getFirstName()!= null ? user.getProfile().getFirstName(): user.getEmail();
+        this.sendEmailFromTemplateSync(user.getEmail(),AppConstant.RECOVER_PASSWORD_EMAIL_SUBJECT,
+                AppConstant.RECOVER_PASSOWRD_EMAIL_TEMPALE,userName,user.getResetKey());
+    }
 }
