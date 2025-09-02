@@ -56,12 +56,12 @@ public class ProductServiceImp implements ProductService {
     public ProductResponse createProduct(ProductDTO productDTO) {
         String name = productDTO.getName();
         List<Product> existingProduct = productRepository.findByNameAndIsDeletedFalse(name);
-        if(!existingProduct.isEmpty()){
-            throw new ResouceAlreadyExist("Product","Name",name);
+        if (!existingProduct.isEmpty()) {
+            throw new ResouceAlreadyExist("Product", "Name", name);
         }
         Product product = new Product();
         Long categoryID = productDTO.getCategoryId();
-        Category category = categoryRepository.findById(categoryID).orElseThrow(()-> new ResourceNotFoundException("Category","categoryID",categoryID));
+        Category category = categoryRepository.findById(categoryID).orElseThrow(() -> new ResourceNotFoundException("Category", "categoryID", categoryID));
         product.setCategory(category);
         product.setName(productDTO.getName());
         product.setDescription(productDTO.getDescription());
@@ -69,13 +69,13 @@ public class ProductServiceImp implements ProductService {
         product.setFeatured(productDTO.getFeatured());
 
         final Product finalProduct = product;
-        product.setImages(IntStream.range(0, productDTO.getImages().size()).mapToObj(index ->{
+        product.setImages(IntStream.range(0, productDTO.getImages().size()).mapToObj(index -> {
             ProductImage productImage = new ProductImage();
             productImage.setPublicUrl(productDTO.getImages().get(index));
             productImage.setImageOrder(index);
             productImage.setProduct(finalProduct);
             return productImage;
-                }).collect(Collectors.toList()));
+        }).collect(Collectors.toList()));
 
         product.setProductVariants(productDTO.getVariants().stream().map(variant -> {
             ProductVariant productVariant = new ProductVariant();
@@ -85,7 +85,7 @@ public class ProductServiceImp implements ProductService {
             productVariant.setDifferentPrice(variant.getDifferentPrice());
             productVariant.setProduct(finalProduct);
 
-            productVariant.setProductImageList(IntStream.range(0,variant.getImages().size()).mapToObj(index ->{
+            productVariant.setProductImageList(IntStream.range(0, variant.getImages().size()).mapToObj(index -> {
                 ProductImage productImage = new ProductImage();
                 productImage.setPublicUrl(variant.getImages().get(index));
                 productImage.setImageOrder(index);
@@ -95,11 +95,11 @@ public class ProductServiceImp implements ProductService {
             return productVariant;
         }).collect(Collectors.toList()));
 
-        String slug = createSlug(productDTO.getName()+ "-"+System.currentTimeMillis());
+        String slug = createSlug(productDTO.getName() + "-" + System.currentTimeMillis());
         product.setSlug(slug);
 
         productRepository.save(product);
-        for(ProductVariant variant: product.getProductVariants()){
+        for (ProductVariant variant : product.getProductVariants()) {
             variant.setSku(generateMeaningfulSku(variant));
 
             Inventory inventory = new Inventory();
@@ -113,7 +113,7 @@ public class ProductServiceImp implements ProductService {
         }
 
         product = productRepository.save(product);
-        return modelMapper.map(product,ProductResponse.class);
+        return modelMapper.map(product, ProductResponse.class);
     }
 
     @Override
@@ -131,25 +131,25 @@ public class ProductServiceImp implements ProductService {
         product.setPrice(product.getPrice());
         String slug = createSlug(product.getName()) + "-" + System.currentTimeMillis();
         product.setSlug(slug);
-        updateProductImage(product,productDTO.getImages());
-        updateProductVariant(product,productDTO.getVariants());
+        updateProductImage(product, productDTO.getImages());
+        updateProductVariant(product, productDTO.getVariants());
 
 
         product = productRepository.save(product);
-        return modelMapper.map(product,ProductResponse.class);
+        return modelMapper.map(product, ProductResponse.class);
     }
 
     private void updateProductVariant(Product product, List<ProductDTO.ProductVariantDTO> variantDTO) {
         List<ProductVariant> currentVariant = new ArrayList<>(product.getProductVariants());
         List<ProductVariant> updatedVariant = new ArrayList<>();
-        for(ProductDTO.ProductVariantDTO variant : variantDTO){
+        for (ProductDTO.ProductVariantDTO variant : variantDTO) {
             ProductVariant productVariant;
-            if(variant.getId()!=null){
+            if (variant.getId() != null) {
                 productVariant = currentVariant.stream().filter(v -> v.getId().equals(variant.getId())).findFirst().
-                        orElseThrow(()-> new ResourceNotFoundException("Product Variant","Id",variant.getId()));
+                        orElseThrow(() -> new ResourceNotFoundException("Product Variant", "Id", variant.getId()));
 
                 currentVariant.removeIf(v -> v.getId().equals(variant.getId()));
-            }else{
+            } else {
                 productVariant = new ProductVariant();
                 productVariant.setProduct(product);
             }
@@ -157,7 +157,7 @@ public class ProductServiceImp implements ProductService {
             productVariant.setSize(ESize.valueOf(variant.getSize().toUpperCase()));
             productVariant.setColor(EColor.valueOf(variant.getColor().toUpperCase()));
             productVariant.setDifferentPrice(variant.getDifferentPrice());
-            updateProductVariantImage(productVariant,variant.getImages());
+            updateProductVariantImage(productVariant, variant.getImages());
 
             updatedVariant.add(productVariant);
         }
@@ -166,14 +166,14 @@ public class ProductServiceImp implements ProductService {
     }
 
     private void updateProductVariantImage(ProductVariant productVariant, List<String> images) {
-        if(productVariant.getProductImageList() == null){
+        if (productVariant.getProductImageList() == null) {
             productVariant.setProductImageList(new ArrayList<>());
         }
         List<ProductImage> imageVariantProduct = productVariant.getProductImageList();
         List<ProductImage> updatedProductImage = new ArrayList<>();
-        for(int i=0;i< images.size();i++){
+        for (int i = 0; i < images.size(); i++) {
             String imageUrl = images.get(i);
-            ProductImage productImage = imageVariantProduct.stream().filter(img -> img.getPublicUrl().equals(imageUrl)).findFirst().orElseGet(() ->{
+            ProductImage productImage = imageVariantProduct.stream().filter(img -> img.getPublicUrl().equals(imageUrl)).findFirst().orElseGet(() -> {
                 ProductImage newImage = new ProductImage();
                 newImage.setProductVariant(productVariant);
                 return newImage;
@@ -188,12 +188,12 @@ public class ProductServiceImp implements ProductService {
     }
 
     private void updateProductImage(Product product, List<String> newImageurl) {
-        List<ProductImage> currentImages= product.getImages();
+        List<ProductImage> currentImages = product.getImages();
         List<ProductImage> updatedProductImage = new ArrayList<>();
 
-        for(int i=0;i<newImageurl.size();i++){
+        for (int i = 0; i < newImageurl.size(); i++) {
             String imageUrl = newImageurl.get(i);
-            ProductImage productImage = currentImages.stream().filter(img-> img.getPublicUrl().equals(imageUrl)).findFirst().orElseGet(ProductImage::new);
+            ProductImage productImage = currentImages.stream().filter(img -> img.getPublicUrl().equals(imageUrl)).findFirst().orElseGet(ProductImage::new);
             productImage.setPublicUrl(imageUrl);
             productImage.setImageOrder(i);
             productImage.setProduct(product);
@@ -206,31 +206,31 @@ public class ProductServiceImp implements ProductService {
 
     @Override
     public String generateMeaningfulSku(ProductVariant variant) {
-        if(variant.getProduct() == null || variant.getProduct().getId()==null){
+        if (variant.getProduct() == null || variant.getProduct().getId() == null) {
             throw new APIException("Product and ProductID must be not null to generate sku.");
         }
         String productId = variant.getProduct().getId().toString();
-        String productColor = variant.getColor().name().substring(0,Math.min(3,variant.getColor().name().length()));
+        String productColor = variant.getColor().name().substring(0, Math.min(3, variant.getColor().name().length()));
         String productSize = variant.getSize().name();
 
-        return String.format("%s-%s-%S",productId,productColor,productSize);
+        return String.format("%s-%s-%S", productId, productColor, productSize);
     }
 
     @Override
     @EnableSoftDeleteFilter
     public ProductResponse getProductById(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product",
-                "productId",id));
-        return modelMapper.map(product,ProductResponse.class);
+                "productId", id));
+        return modelMapper.map(product, ProductResponse.class);
     }
 
     @Override
     @EnableSoftDeleteFilter
     public ProductResponse getProductBySlug(String slug) {
         Product product = productRepository.findBySlug(slug).orElseThrow(() -> new
-                ResourceNotFoundException("Product","Slug",slug));
+                ResourceNotFoundException("Product", "Slug", slug));
 
-        return modelMapper.map(product,ProductResponse.class);
+        return modelMapper.map(product, ProductResponse.class);
     }
 
     @Override

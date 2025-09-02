@@ -8,16 +8,14 @@ import com.hcmute.clothingstore.dto.response.GoogleTokenResponse;
 import com.hcmute.clothingstore.dto.response.GoogleUserInfoResponse;
 import com.hcmute.clothingstore.dto.response.LoginResponse;
 import com.hcmute.clothingstore.dto.response.RegisterResponse;
-import com.hcmute.clothingstore.entity.CustomerAccount;
-import com.hcmute.clothingstore.entity.Point;
-import com.hcmute.clothingstore.entity.Profile;
-import com.hcmute.clothingstore.entity.User;
+import com.hcmute.clothingstore.entity.*;
 import com.hcmute.clothingstore.enumerated.Gender;
 import com.hcmute.clothingstore.exception.APIException;
 import com.hcmute.clothingstore.exception.ResourceNotFoundException;
 import com.hcmute.clothingstore.jwt.JwtUtil;
 import com.hcmute.clothingstore.jwt.RandomUtil;
 import com.hcmute.clothingstore.repository.RoleRepository;
+import com.hcmute.clothingstore.repository.TokenBlackListRepository;
 import com.hcmute.clothingstore.repository.UserRepository;
 import com.hcmute.clothingstore.service.interfaces.AuthenticationService;
 import com.hcmute.clothingstore.service.interfaces.EmailService;
@@ -54,6 +52,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private TokenBlackListRepository tokenBlacklistRepo;
 
 
     @Autowired
@@ -217,6 +218,33 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setResetDate(null);
         user.setResetKey(null);
         userRepository.save(user);
+    }
+
+    @Override
+    public void logout(String refreshToken) {
+        String token = jwtUtil.getCurrentUserJWT().orElse(null);
+        if(token == null){
+            throw new APIException("Invalid Access Token");
+        }
+        try{
+            jwtUtil.jwtDecoder(refreshToken);
+        }catch (Exception e){
+            throw new APIException("Invalid refresh token");
+        }
+        Jwt jwt = jwtUtil.jwtDecoder(token);
+        TokenBlacklist tokenBlacklist = new TokenBlacklist();
+        tokenBlacklist.setToken(token);
+        tokenBlacklist.setCreatedDate(jwt.getIssuedAt());
+        tokenBlacklist.setExpiryDate(jwt.getExpiresAt());
+        tokenBlacklistRepo.save(tokenBlacklist);
+
+        String email = jwtUtil.getCurrentUserLogin().orElse(null);
+        if(email!= null){
+            User user = userService.handleGetUserByUsername(email);
+            user.getUserRefreshTokens().removeIf(rt -> rt.getRefreshToken().equals(refreshToken));
+            userRepository.save(user);
+        }
+
     }
 
     @Override

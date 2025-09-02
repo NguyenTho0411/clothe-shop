@@ -1,7 +1,10 @@
 package com.hcmute.clothingstore.controller;
 
 
+import com.hcmute.clothingstore.dto.request.ChangePasswordRequestDTO;
+import com.hcmute.clothingstore.dto.request.EditProfileRequestDTO;
 import com.hcmute.clothingstore.dto.request.UserDTO;
+import com.hcmute.clothingstore.dto.response.ProfileResponse;
 import com.hcmute.clothingstore.dto.response.UserResponse;
 import com.hcmute.clothingstore.entity.User;
 import com.hcmute.clothingstore.service.interfaces.UserService;
@@ -33,6 +36,24 @@ public class UserController {
     public ResponseEntity<UserResponse> createNewUser(@RequestBody @Valid UserDTO userDTO){
         UserResponse user = userService.createNewUser(userDTO);
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @GetMapping("/users/profile")
+    public ResponseEntity<ProfileResponse> getProfile(){
+        ProfileResponse profileResponse = userService.getProfile();
+        return new ResponseEntity<>(profileResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/users/profile")
+    public ResponseEntity<UserResponse> editProfile(@RequestBody @Valid EditProfileRequestDTO requestDTO){
+        UserResponse userResponse = userService.editProfile(requestDTO);
+        return new ResponseEntity<>(userResponse, HttpStatus.OK);
+    }
+
+    @PutMapping("/users/change_password")
+    public ResponseEntity<Void> changePassword(@RequestBody @Valid ChangePasswordRequestDTO changePasswordRequestDTO){
+        userService.changePassword(changePasswordRequestDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
