@@ -14,13 +14,15 @@ public final class RandomUtil {
     }
 
     public static String generateActivationCode() {
-        return generateRandomAlphabetString();
+        return generateRandomAlphanumericString();
     }
 
-    private static String generateRandomAlphabetString() {
+    private static String generateRandomAlphanumericString() {
         return RandomStringUtils.random(KEY_LENGTH,0,0,false,true,(char[]) null, SECURE_RANDOM);
     }
-
+    public static String generateResetKey() {
+        return generateRandomAlphanumericString();
+    }
     public static String generateActivationKey() {
         return generateRandomNumericString();
     }
@@ -31,4 +33,8 @@ public final class RandomUtil {
 static {
         SECURE_RANDOM.nextBytes(new byte[64]);
 }
+
+
+
+
 }

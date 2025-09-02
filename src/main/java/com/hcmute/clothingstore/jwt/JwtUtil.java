@@ -4,14 +4,16 @@ package com.hcmute.clothingstore.jwt;
 import com.hcmute.clothingstore.dto.response.LoginResponse;
 import com.hcmute.clothingstore.entity.User;
 import com.hcmute.clothingstore.repository.UserRepository;
+import com.nimbusds.jose.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwsHeader;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -77,5 +79,25 @@ public class JwtUtil {
                 claim("user",userInsideToken).build();
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader,claimsSet)).getTokenValue();
+    }
+
+
+    public Jwt jwtDecoder(String token) {
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(
+                getSecretKey()).macAlgorithm(JWT_ALGORITHM).build();
+        // Set a clock skew to handle token expiration window
+        jwtDecoder.setJwtValidator(
+                new DelegatingOAuth2TokenValidator<Jwt>(JwtValidators.createDefault(),
+                        new JwtTimestampValidator(Duration.ofSeconds(0))));
+        try {
+            return jwtDecoder.decode(token);
+        } catch (Exception e) {
+            System.out.println(">>> JWT error: " + e.getMessage());
+            throw e;
+        }
+    }
+    private SecretKey getSecretKey() {
+        byte[] keyBytes = Base64.from(jwtKey).decode();
+        return new SecretKeySpec(keyBytes, 0, keyBytes.length, JWT_ALGORITHM.getName());
     }
 }
